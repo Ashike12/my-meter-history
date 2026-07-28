@@ -13,13 +13,14 @@ npm run preview
 
 ## API Proxy
 
-The app calls the BREB API through the Vite dev proxy:
+The app calls the BREB API through a relative `/api` path:
 
 ```text
 /api/breb-customer/cust/*
 ```
 
-The proxy forwards requests to:
+In local development, the Vite dev proxy forwards those requests. In Vercel,
+`vercel.json` applies the same rewrite in production. Both point to:
 
 ```text
 https://api.brebprepaidportal.com
