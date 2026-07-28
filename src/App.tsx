@@ -11,6 +11,7 @@ import {
   History,
   Eye,
   Loader2,
+  Menu,
   PlugZap,
   ReceiptText,
   RefreshCw,
@@ -54,6 +55,7 @@ function App() {
   const [selectedMeterNo, setSelectedMeterNo] = useState(METER_OPTIONS[0].MeterNumber)
   const [dashboard, setDashboard] = useState<DashboardState>(initialDashboardState)
   const [selectedRecharge, setSelectedRecharge] = useState<RechargeHistoryRow | null>(null)
+  const [isMeterDrawerOpen, setIsMeterDrawerOpen] = useState(false)
 
   const selectedMeter = useMemo(
     () =>
@@ -162,49 +164,50 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [selectedRecharge])
 
+  useEffect(() => {
+    if (!isMeterDrawerOpen) {
+      return undefined
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsMeterDrawerOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isMeterDrawerOpen])
+
+  const handleMeterSelect = (meterNumber: string) => {
+    setSelectedMeterNo(meterNumber)
+    setIsMeterDrawerOpen(false)
+  }
+
   return (
     <div className="dashboard-shell">
       <aside className="sidebar" aria-label="Meter navigation">
-        <div className="brand">
-          <span className="brand-mark" aria-hidden="true">
-            <PlugZap size={20} strokeWidth={2.4} />
-          </span>
-          <div>
-            <p className="eyebrow">BREB prepaid</p>
-            <h1>Meter Desk</h1>
-          </div>
-        </div>
-
-        <nav className="meter-list" aria-label="Meters">
-          {METER_OPTIONS.map((meter) => (
-            <button
-              className={`meter-button${
-                meter.MeterNumber === selectedMeterNo ? ' is-selected' : ''
-              }`}
-              key={meter.MeterNumber}
-              onClick={() => setSelectedMeterNo(meter.MeterNumber)}
-              type="button"
-            >
-              <span className="meter-icon" aria-hidden="true">
-                <Gauge size={17} />
-              </span>
-              <span>
-                <strong>{meter.MeterLabel}</strong>
-                <small>{meter.MeterNumber}</small>
-              </span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="sidebar-note">
-          <RadioTower size={16} aria-hidden="true" />
-          <span>Live data is loaded through the Vite API proxy.</span>
-        </div>
+        <MeterNavigation
+          selectedMeterNo={selectedMeterNo}
+          onSelectMeter={handleMeterSelect}
+        />
       </aside>
 
       <main className="workspace">
         <header className="topbar">
-          <div>
+          <button
+            aria-controls="meter-drawer"
+            aria-expanded={isMeterDrawerOpen}
+            className="mobile-menu-button"
+            onClick={() => setIsMeterDrawerOpen(true)}
+            type="button"
+          >
+            <Menu size={19} aria-hidden="true" />
+            <span>Meters</span>
+          </button>
+
+          <div className="topbar-title">
             <p className="eyebrow">Selected meter</p>
             <h2>{selectedMeter.MeterLabel}</h2>
             <p className="meter-context">Meter number {selectedMeter.MeterNumber}</p>
@@ -388,7 +391,92 @@ function App() {
           onClose={() => setSelectedRecharge(null)}
         />
       ) : null}
+
+      <div
+        className={`drawer-backdrop${isMeterDrawerOpen ? ' is-open' : ''}`}
+        onMouseDown={() => setIsMeterDrawerOpen(false)}
+      />
+      <aside
+        aria-hidden={!isMeterDrawerOpen}
+        aria-label="Mobile meter navigation"
+        className={`meter-drawer${isMeterDrawerOpen ? ' is-open' : ''}`}
+        id="meter-drawer"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <div className="drawer-header">
+          <BrandBlock />
+          <button
+            aria-label="Close meter menu"
+            className="drawer-close-button"
+            onClick={() => setIsMeterDrawerOpen(false)}
+            type="button"
+          >
+            <X size={18} aria-hidden="true" />
+          </button>
+        </div>
+        <MeterNavigation
+          selectedMeterNo={selectedMeterNo}
+          onSelectMeter={handleMeterSelect}
+          showBrand={false}
+        />
+      </aside>
     </div>
+  )
+}
+
+function BrandBlock() {
+  return (
+    <div className="brand">
+      <span className="brand-mark" aria-hidden="true">
+        <PlugZap size={20} strokeWidth={2.4} />
+      </span>
+      <div>
+        <p className="eyebrow">BREB prepaid</p>
+        <h1>Meter Desk</h1>
+      </div>
+    </div>
+  )
+}
+
+function MeterNavigation({
+  selectedMeterNo,
+  onSelectMeter,
+  showBrand = true,
+}: {
+  selectedMeterNo: string
+  onSelectMeter: (meterNumber: string) => void
+  showBrand?: boolean
+}) {
+  return (
+    <>
+      {showBrand ? <BrandBlock /> : null}
+
+      <nav className="meter-list" aria-label="Meters">
+        {METER_OPTIONS.map((meter) => (
+          <button
+            className={`meter-button${
+              meter.MeterNumber === selectedMeterNo ? ' is-selected' : ''
+            }`}
+            key={meter.MeterNumber}
+            onClick={() => onSelectMeter(meter.MeterNumber)}
+            type="button"
+          >
+            <span className="meter-icon" aria-hidden="true">
+              <Gauge size={17} />
+            </span>
+            <span>
+              <strong>{meter.MeterLabel}</strong>
+              <small>{meter.MeterNumber}</small>
+            </span>
+          </button>
+        ))}
+      </nav>
+
+      <div className="sidebar-note">
+        <RadioTower size={16} aria-hidden="true" />
+        <span>Live data is loaded through the Vite API proxy.</span>
+      </div>
+    </>
   )
 }
 
