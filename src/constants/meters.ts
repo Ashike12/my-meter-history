@@ -21,8 +21,8 @@ export const METER_OPTIONS: MeterConfig[] = [
     MeterLabel: '4A-4B',
   },
   {
-    MeterNumber: 'Warehouse',
-    MeterLabel: '40510245082',
+    MeterNumber: '40510245082',
+    MeterLabel: 'Warehouse',
   },
   {
     MeterNumber: '40510173422',
