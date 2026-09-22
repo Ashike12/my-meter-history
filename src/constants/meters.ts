@@ -21,6 +21,10 @@ export const METER_OPTIONS: MeterConfig[] = [
     MeterLabel: '4A-4B',
   },
   {
+    MeterNumber: 'Warehouse',
+    MeterLabel: '40510245082',
+  },
+  {
     MeterNumber: '40510173422',
     MeterLabel: 'Savar Home',
   },
@@ -28,4 +32,8 @@ export const METER_OPTIONS: MeterConfig[] = [
     MeterNumber: '40510245641',
     MeterLabel: 'Shop',
   },
+  {
+    MeterNumber: '40510245643',
+    MeterLabel: 'Shop-backyard',
+  }
 ]
